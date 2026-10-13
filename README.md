@@ -7,4 +7,4 @@
 EntelloCore is a Java library for extracting posts and media from supported social media platforms.
 
 It provides the content extraction functionality used by applications in the EntelloVerse ecosystem,
-such as [Entellord]([Entellord](https://github.com/vlemazza/entellord)) for Discord and, in the future, Entellogram for Telegram.
+such as [Entellord](https://github.com/vlemazza/entellord) for Discord and, in the future, Entellogram for Telegram.
