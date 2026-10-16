@@ -1,10 +1,10 @@
 package it.vle.entellocore.service;
 
-import it.vle.entellocore.model.ExtractedPost;
+import it.vle.entellocore.model.TextExtractionOutcome;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ContentExtractionEngine {
 
-    Optional<ExtractedPost> process(String rawUrl);
+    List<TextExtractionOutcome> extractFromText(String text);
 }

@@ -1,6 +1,6 @@
-package it.vle.entellocore.service;
+package it.vle.entellocore.exception;
 
-public class ContentExtractionException extends RuntimeException {
+public class ContentExtractionException extends Exception {
 
     public ContentExtractionException(String message, Throwable cause) {
         super(message, cause);

@@ -1,34 +1,96 @@
 package it.vle.entellocore.model;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public enum SocialService {
 
-    TWITTER(List.of("twitter.com", "x.com"), ExtractorType.GALLERY_DL),
-    BLUESKY(List.of("bsky.app"), ExtractorType.GALLERY_DL),
-    TIKTOK(List.of("tiktok.com"), ExtractorType.GALLERY_DL),
-    INSTAGRAM(List.of("instagram.com"), ExtractorType.GALLERY_DL),
-    REDDIT(List.of("reddit.com"), ExtractorType.GALLERY_DL),
-    BILIBILI(List.of("bilibili.com"), ExtractorType.GALLERY_DL),
-    PIXIV(List.of("pixiv.net"), ExtractorType.GALLERY_DL),
-    AO3(List.of("archiveofourown.org"), ExtractorType.GALLERY_DL),
-    POIPIKU(List.of("poipiku.com"), ExtractorType.GALLERY_DL),
-    TUMBLR(List.of("tumblr.com"), ExtractorType.GALLERY_DL),
-    PINTEREST(List.of("pinterest.com"), ExtractorType.GALLERY_DL),
-    YOUTUBE(List.of("youtube.com", "youtu.be"), ExtractorType.YOUTUBE_DL),
+    TWITTER(
+            List.of("twitter.com", "x.com"),
+            Map.of(
+                    "nitter.tiekoetter.com", "twitter.com",
+                    "shitter.thepixora.com", "twitter.com"
+            ),
+            ExtractorType.GALLERY_DL
+    ),
+    BLUESKY(
+            List.of("bsky.app"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    TIKTOK(
+            List.of("tiktok.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    INSTAGRAM(
+            List.of("instagram.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    REDDIT(
+            List.of("reddit.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    BILIBILI(
+            List.of("bilibili.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    PIXIV(
+            List.of("pixiv.net"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    AO3(
+            List.of("archiveofourown.org"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    POIPIKU(
+            List.of("poipiku.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    TUMBLR(
+            List.of("tumblr.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    PINTEREST(
+            List.of("pinterest.com"),
+            Map.of(),
+            ExtractorType.GALLERY_DL
+    ),
+    YOUTUBE(
+            List.of("youtube.com", "youtu.be"),
+            Map.of(),
+            ExtractorType.YOUTUBE_DL
+    ),
+    HACKER_NEWS(
+            List.of("news.ycombinator.com"),
+            Map.of(),
+            ExtractorType.HACKER_NEWS
+    ),
+    NOT_AVAILABLE(
+            List.of(),
+            Map.of(),
+            ExtractorType.NOT_AVAILABLE
+    );
 
-    HACKER_NEWS(List.of("news.ycombinator.com"), ExtractorType.HACKER_NEWS),
-    NOT_AVAILABLE(List.of(), ExtractorType.NOT_AVAILABLE);
-
-    private static final List<String> NITTER_INSTANCES = List.of("nitter.tiekoetter.com", "shitter.thepixora.com");
     private final List<String> domains;
+    private final Map<String, String> alternateHosts;
     private final ExtractorType extractorType;
 
-    SocialService(List<String> domains, ExtractorType extractorType) {
+    SocialService(
+            List<String> domains,
+            Map<String, String> alternateHosts,
+            ExtractorType extractorType) {
+
         this.domains = domains;
+        this.alternateHosts = alternateHosts;
         this.extractorType = extractorType;
     }
 
@@ -36,85 +98,52 @@ public enum SocialService {
         return extractorType;
     }
 
-    public boolean matches(String url) {
-        URI uri = parseHttpUri(url);
-        if (uri == null || uri.getRawUserInfo() != null) {
-            return false;
+    public static SocialService fromHost(String host) {
+        if (host == null || host.isBlank()) {
+            return NOT_AVAILABLE;
         }
-        String host = uri.getHost().toLowerCase(Locale.ROOT);
-        return matchesHost(host, domains) || this == TWITTER && matchesHost(host, NITTER_INSTANCES);
-    }
 
-    public static SocialService fromUrl(String url) {
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+
         for (SocialService service : values()) {
-            if (service == NOT_AVAILABLE) {
-                continue;
-            }
-            if (service.matches(url)) {
+            if (service != NOT_AVAILABLE && service.supportsHost(normalizedHost)) {
                 return service;
             }
         }
+
         return NOT_AVAILABLE;
     }
 
-    public String normalizeTwitterUrl(String url) {
-        if (this != TWITTER) {
-            return url;
+    public String normalizeHost(String host) {
+        String normalizedHost = host.toLowerCase(Locale.ROOT);
+
+        for (Map.Entry<String, String> entry : alternateHosts.entrySet()) {
+
+            if (matchesDomain(normalizedHost, entry.getKey())) {
+                return entry.getValue();
+            }
         }
 
-        URI uri = parseHttpUri(url);
-        if (uri == null || uri.getHost() == null) {
-            return url;
-        }
-
-        String host = uri.getHost().toLowerCase(Locale.ROOT);
-        String normalizedHost;
-
-        if (matchesHost(host, NITTER_INSTANCES)) {
-            normalizedHost = "twitter.com";
-        } else {
-            return url;
-        }
-
-        try {
-            return new URI(
-                    uri.getScheme(),
-                    null,
-                    normalizedHost,
-                    -1,
-                    uri.getPath(),
-                    uri.getQuery(),
-                    uri.getFragment()
-            ).toASCIIString();
-        } catch (URISyntaxException exception) {
-            return url;
-        }
+        return normalizedHost;
     }
 
-    private static boolean matchesHost(String host, List<String> domains) {
+    private boolean supportsHost(String host) {
         for (String domain : domains) {
-            if (host.equals(domain) || host.endsWith("." + domain)) {
+            if (matchesDomain(host, domain)) {
                 return true;
             }
         }
+
+        for (String alternateHost : alternateHosts.keySet()) {
+            if (matchesDomain(host, alternateHost)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
-    private static URI parseHttpUri(String url) {
-        if (url == null || url.isBlank()) {
-            return null;
-        }
-        try {
-            URI uri = new URI(url);
-            String scheme = uri.getScheme();
-            if (uri.isOpaque() || uri.getHost() == null || scheme == null
-                    || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
-                return null;
-            }
-            return uri;
-        } catch (URISyntaxException exception) {
-            return null;
-        }
+    private static boolean matchesDomain(String host, String domain) {
+        return host.equals(domain) || host.endsWith("." + domain);
     }
-
 }

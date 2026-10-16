@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.vle.entellocore.api.BlueskyApi;
+import it.vle.entellocore.exception.ContentExtractionException;
 import it.vle.entellocore.model.ExtractedPost;
 import it.vle.entellocore.model.ExtractedPostBluesky;
 import it.vle.entellocore.model.SocialService;
@@ -48,10 +49,7 @@ public class GalleryDlService implements ContentService {
     private final Path configurationPath;
 
     @Override
-    public ExtractedPost extract(String url, SocialService service) {
-        if (service == SocialService.NOT_AVAILABLE) {
-            throw new ContentExtractionException("Unsupported URL");
-        }
+    public ExtractedPost extract(String url, SocialService service) throws ContentExtractionException {
 
         Path directory = null;
         ExtractedPost metadata = null;
@@ -111,7 +109,7 @@ public class GalleryDlService implements ContentService {
         }
     }
 
-    private ExtractedPost enrichBlueskyPost(ExtractedPost post) {
+    private ExtractedPost enrichBlueskyPost(ExtractedPost post) throws ContentExtractionException {
         if (!(post instanceof ExtractedPostBluesky bluesky) || bluesky.getEmbeddedPostUri() == null) {
             return post;
         }

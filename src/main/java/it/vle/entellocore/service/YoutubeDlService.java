@@ -1,6 +1,7 @@
 package it.vle.entellocore.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.vle.entellocore.exception.ContentExtractionException;
 import it.vle.entellocore.model.ExtractedPost;
 import it.vle.entellocore.model.SocialService;
 import it.vle.entellocore.parser.MetadataParser;
@@ -13,9 +14,13 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class YoutubeDlService implements ContentService {
+
+    private static final Logger LOGGER = Logger.getLogger(YoutubeDlService.class.getName());
 
     private static final Duration PROCESS_TIMEOUT = Duration.ofMinutes(5);
     private static final long MAX_VIDEO_DURATION_SECONDS = 3600;
@@ -35,10 +40,7 @@ public class YoutubeDlService implements ContentService {
     }
 
     @Override
-    public ExtractedPost extract(String url, SocialService service) {
-        if (service != SocialService.YOUTUBE) {
-            throw new ContentExtractionException("Unsupported URL for yt-dlp");
-        }
+    public ExtractedPost extract(String url, SocialService service) throws ContentExtractionException {
 
         Path directory = null;
         ExtractedPost post = null;
@@ -63,9 +65,7 @@ public class YoutubeDlService implements ContentService {
                         .toList();
             }
             if (media.isEmpty()) {
-                throw new ContentExtractionException(
-                        "No video downloaded"
-                );
+                throw new ContentExtractionException("No video downloaded");
             }
 
             post.replaceMedia(media);
@@ -84,7 +84,8 @@ public class YoutubeDlService implements ContentService {
                     } else {
                         this.deleteDirectory(directory);
                     }
-                } catch (IOException _) {
+                } catch (IOException cleanupException) {
+                    LOGGER.log(Level.WARNING, "Unable to remove temporary yt-dlp files", cleanupException);
                 }
             }
         }
@@ -104,13 +105,11 @@ public class YoutubeDlService implements ContentService {
         );
     }
 
-    private Path findInfoFile(Path directory) throws IOException {
+    private Path findInfoFile(Path directory) throws IOException, ContentExtractionException {
         try (Stream<Path> files = Files.list(directory)) {
             return files.filter(path -> path.getFileName().toString().endsWith(".info.json"))
                     .findFirst()
-                    .orElseThrow(() -> new ContentExtractionException(
-                            "yt-dlp returned no video metadata"
-                    ));
+                    .orElseThrow(() -> new ContentExtractionException("yt-dlp returned no video metadata"));
         }
     }
 

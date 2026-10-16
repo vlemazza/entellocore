@@ -13,7 +13,7 @@ public final class ExternalProcessRunner {
     private static final int MAX_LOG_BYTES = 16 * 1024;
 
     public static String run(List<String> command, Duration timeout, String failureMessage) throws IOException, InterruptedException {
-        Path outputFile = Files.createTempFile("entellocore-process-", ".log");
+        Path outputFile = Files.createTempFile("entellocore-extract-", ".log");
         Process process = null;
         try {
             process = new ProcessBuilder(command)
