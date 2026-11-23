@@ -5,6 +5,7 @@ import it.vle.entellocore.model.ExtractedPost;
 import it.vle.entellocore.model.SocialService;
 import it.vle.entellocore.model.TextExtractionOutcome;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,13 +59,15 @@ public class EntelloContentExtractionEngine
                                 exception
                         )
                 );
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
 
         return List.copyOf(outcomes);
     }
 
-    private ExtractedPost extractPost(SocialUrlResolver.ResolvedSocialUrl resolved) throws ContentExtractionException {
+    private ExtractedPost extractPost(SocialUrlResolver.ResolvedSocialUrl resolved) throws ContentExtractionException, IOException, InterruptedException {
 
         SocialService service = resolved.service();
 

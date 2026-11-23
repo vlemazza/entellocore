@@ -18,6 +18,7 @@ public class MetadataParserFactory {
             case TUMBLR -> new TumblrMetadataParser();
             case PINTEREST -> new PinterestMetadataParser();
             case YOUTUBE -> new YoutubeMetadataParser();
+            case FACEBOOK -> new FacebookMetadataParser();
             case HACKER_NEWS, NOT_AVAILABLE -> throw new UnsupportedOperationException("Unsupported service: " + service);
         };
     }

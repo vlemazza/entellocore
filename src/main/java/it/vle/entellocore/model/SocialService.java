@@ -64,6 +64,11 @@ public enum SocialService {
             Map.of(),
             ExtractorType.GALLERY_DL
     ),
+    FACEBOOK(
+            List.of("facebook.com"),
+            Map.of(),
+            ExtractorType.FACEBOOK
+    ),
     YOUTUBE(
             List.of("youtube.com", "youtu.be"),
             Map.of(),
