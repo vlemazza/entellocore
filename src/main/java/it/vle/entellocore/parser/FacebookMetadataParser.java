@@ -13,7 +13,7 @@ public class FacebookMetadataParser implements MetadataParser {
 
         String author = json.path("username").asText();
 
-        String text = this.parseDescription(json);
+        String text = json.path("post_text").asText("");
 
         String date = json.path("date").asText("");
         Long timestamp = date.isEmpty() ? null : DataConvert.toUnixTimestamp(date);
