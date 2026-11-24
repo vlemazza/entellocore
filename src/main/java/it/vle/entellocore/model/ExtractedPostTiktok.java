@@ -8,4 +8,8 @@ public class ExtractedPostTiktok extends ExtractedPost{
         super(author, text, media, timestamp);
     }
 
+    public String getUrlProfile(){
+        return "https://www.tiktok.com/@" + author;
+    }
+
 }
