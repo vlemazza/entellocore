@@ -13,11 +13,13 @@ public class InstagramMetadataParser implements MetadataParser {
 
         String author = json.path("fullname").asText();
 
+        String username = json.path("username").asText();
+
         String text = json.path("description").asText();
 
         Long timestamp = DataConvert.toUnixTimestamp(json.path("date").asText());
 
-        return new ExtractedPostInstagram(author, text, List.of(),timestamp);
+        return new ExtractedPostInstagram(author, username, text, List.of(),timestamp);
 
     }
 }
