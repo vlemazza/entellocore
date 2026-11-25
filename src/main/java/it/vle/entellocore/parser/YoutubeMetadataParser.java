@@ -16,10 +16,11 @@ public class YoutubeMetadataParser implements MetadataParser {
     public ExtractedPost parse(JsonNode json) {
         String title = json.path("title").asText();
         String uploader = json.path("uploader").asText();
+        String channelUrl = json.path("uploader_url").asText();
         String channel = json.path("channel").asText();
         String author = uploader.isBlank() ? channel : uploader;
 
-        return new ExtractedPostYoutube(title, author, channel, List.of(), this.readTimestamp(json));
+        return new ExtractedPostYoutube(title, author, channel, channelUrl, List.of(), this.readTimestamp(json));
     }
 
     private Long readTimestamp(JsonNode json) {
