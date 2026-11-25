@@ -62,4 +62,20 @@ public class ExtractedPostTwitter extends ExtractedPost{
         return this.author + " (@" + username + ")";
     }
 
+
+    public ExtractedPostTwitter withText(String text) {
+        return new ExtractedPostTwitter(
+                getAuthor(),
+                text,
+                getMedia(),
+                getTimestamp(),
+                this.replyCount,
+                this.retweetCount,
+                this.quoteCount,
+                this.viewCount,
+                this.profileImageUrl,
+                this.username
+        );
+    }
+
 }

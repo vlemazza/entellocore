@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.vle.entellocore.api.BlueskyApi;
+import it.vle.entellocore.api.TwitterPageMetadataClient;
+import it.vle.entellocore.model.ExtractedPostTwitter;
 import it.vle.entellocore.exception.ContentExtractionException;
 import it.vle.entellocore.model.ExtractedPost;
 import it.vle.entellocore.model.ExtractedPostBluesky;
@@ -33,6 +35,7 @@ public class GalleryDlService implements ContentService {
     private final ObjectMapper mapper;
     private final MetadataParserFactory parserFactory;
     private final BlueskyApi blueskyApi;
+    private final TwitterPageMetadataClient twitterMetadataClient;
 
     public GalleryDlService() {
         this(Path.of("gallery-dl"), CoreConfiguration.galleryDlConfigPath(), new ObjectMapper());
@@ -44,6 +47,7 @@ public class GalleryDlService implements ContentService {
         this.mapper = mapper;
         this.parserFactory = new MetadataParserFactory();
         this.blueskyApi = new BlueskyApi();
+        this.twitterMetadataClient = new TwitterPageMetadataClient();
     }
 
     private final Path configurationPath;
@@ -71,6 +75,7 @@ public class GalleryDlService implements ContentService {
             Path info = directory.resolve("info.json");
             JsonNode json = mapper.readTree(info.toFile());
             metadata = parser.parse(json);
+            metadata = enrichTwitterPost(metadata, url);
             metadata.addTemporaryDirectory(directory);
 
             try (Stream<Path> files = Files.walk(directory)) {
@@ -99,6 +104,21 @@ public class GalleryDlService implements ContentService {
                 }
             }
         }
+    }
+
+    private ExtractedPost enrichTwitterPost(ExtractedPost post, String sourceUrl) {
+        if (!(post instanceof ExtractedPostTwitter twitter)
+                || (twitter.getText() != null && !twitter.getText().isBlank())) {
+            return post;
+        }
+
+        String description = twitterMetadataClient.fetchDescription(sourceUrl);
+
+        if (description == null || description.isBlank()) {
+            return post;
+        }
+
+        return twitter.withText(description);
     }
 
     private void deleteDirectory(Path directory) throws IOException {
