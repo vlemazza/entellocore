@@ -1,0 +1,35 @@
+{
+    "extractor": {
+        "twitter": {
+            "text-tweets": true,
+            "retweets": "original"
+        },
+        "facebook": {
+            "cookies": "/app/config/session/facebook_cookies.txt",
+            "videos": "ytdl"
+        },
+        "tiktok": {
+            "cookies": "/app/config/session/tiktok_cookies.txt",
+            "audio": "ytdl",
+            "videos": "ytdl"
+        },
+        "instagram": {
+            "cookies": "/app/config/session/instagram_cookies.txt",
+            "user-agent": "<<USER-AGENT>>"
+        },
+        "reddit": {
+            "client-id": "<<CLIENT-ID>>",
+            "user-agent": "<<USER-AGENT>>"
+        },
+        "pixiv": {
+            "refresh-token": "<<TOKEN>>"
+        },
+        "tumblr": {
+            "api-key": "<<TOKEN>>",
+            "api-secret": "<<TOKEN>>"
+        },
+        "ytdl": {
+            "cmdline-args": "--dump-json"
+        }
+    }
+}
